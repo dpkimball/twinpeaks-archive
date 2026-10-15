@@ -1,0 +1,104 @@
+### This is the main way to configure the application (other than annotations).
+### This file is in Yaml format but you can also configure spring boot using the traditional
+### Java properties file format.
+
+spring.jmx:
+   enabled: false
+
+server:
+  port: 8090
+
+#management endpoints on a separate port
+management:
+  port: 8091
+  security:
+    enabled: true # management port is internal only. no need to secure it.
+
+#default project info followed by actual injected pom-specified values.
+project:
+  name: twinpeaks
+  version: 0.1
+  description: Twinpeaks Rest service
+info:
+  build:
+    artifact: ${project.artifactId}
+    name: ${project.name}
+    description: ${project.desc./grription}
+    version: ${project.version}
+
+receipt.service:
+  name: 'local'
+
+spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults: false
+spring.jpa.database-platform: org.hibernate.dialect.PostgreSQL9Dialect
+
+logging:
+  file: twinpeaks.log
+  org.hibernate: INFO
+
+# add a default profile
+# you can specify a profile by setting -Dspring.profiles.active=test
+spring:
+  profiles:
+    active: local
+
+---
+spring:
+  profiles: test
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+      dialect: org.hibernate.dialect.PostgreSQL94Dialect
+      jdbc:
+        lob:
+          non_contextual_creation: true
+
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://localhost:9000/twinpeaks_test
+    username: twinpeaks
+    password: ${TWINPEAKS_DB_PASSWORD}
+    driverClassName: org.postgresql.Driver
+
+---
+spring:
+  profiles: docker
+  jpa:
+    show-sql: true
+    hibernate:
+      cache:
+        region.factory_class: org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
+        use_query_cache: true
+        use_second_level_cache: true
+        provider_class: net.sf.ehcache.hibernate.EhCacheProvider
+      ddl-auto: update
+      dialect: org.hibernate.dialect.PostgreSQL94Dialect
+
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://twinpeaks--postgres:5432/twinpeaks_test
+    username: twinpeaks
+    password: ${TWINPEAKS_DB_PASSWORD}
+    driverClassName: org.postgresql.Driver
+
+---
+spring:
+  profiles: local
+  jpa:
+    show-sql: true
+    hibernate:
+      cache:
+        region.factory_class: org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
+        use_query_cache: true
+        use_second_level_cache: true
+        provider_class: net.sf.ehcache.hibernate.EhCacheProvider
+      ddl-auto: update
+      dialect: org.hibernate.dialect.PostgreSQL94Dialect
+
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://localhost:9000/twinpeaks
+    username: twinpeaks
+    password: ${TWINPEAKS_DB_PASSWORD}
+    driverClassName: org.postgresql.Driver
